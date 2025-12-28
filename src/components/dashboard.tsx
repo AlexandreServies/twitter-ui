@@ -62,12 +62,6 @@ export function Dashboard({ data, onLogout, onRefresh, isRefreshing }: Dashboard
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <DateRangePicker
-                startDate={dateRange.start}
-                endDate={dateRange.end}
-                onChange={setDateRange}
-                availableDates={availableDates}
-              />
               <button
                 onClick={onRefresh}
                 disabled={isRefreshing}
@@ -90,6 +84,16 @@ export function Dashboard({ data, onLogout, onRefresh, isRefreshing }: Dashboard
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Date Range Picker */}
+        <div className="mb-6">
+          <DateRangePicker
+            startDate={dateRange.start}
+            endDate={dateRange.end}
+            onChange={setDateRange}
+            availableDates={availableDates}
+          />
+        </div>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatsCard
