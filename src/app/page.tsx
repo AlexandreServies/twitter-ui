@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { ApiKeyInput } from "@/components/api-key-input";
-import { Dashboard } from "@/components/dashboard";
-import { UsageResponse } from "@/lib/types";
-import { fetchUsage } from "@/lib/api";
+import {useCallback, useEffect, useRef, useState} from "react";
+import {ApiKeyInput} from "@/components/api-key-input";
+import {Dashboard} from "@/components/dashboard";
+import {UsageResponse} from "@/lib/types";
+import {DateRange, fetchUsage, getDefaultDateRange} from "@/lib/api";
 
 const API_KEY_STORAGE_KEY = "twitter-api-key";
 
@@ -14,6 +14,8 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+    const [dateRange, setDateRange] = useState<DateRange>(getDefaultDateRange);
+    const currentDateRangeRef = useRef<DateRange>(dateRange);
 
   // Load API key from localStorage on mount
   useEffect(() => {
@@ -25,12 +27,14 @@ export default function Home() {
     setIsInitialized(true);
   }, []);
 
-  const handleConnect = useCallback(async (key: string) => {
+    const handleConnect = useCallback(async (key: string, range?: DateRange) => {
     setIsLoading(true);
     setError(null);
 
+        const effectiveRange = range || currentDateRangeRef.current;
+
     try {
-      const usageData = await fetchUsage(key);
+        const usageData = await fetchUsage(key, effectiveRange);
       setData(usageData);
       setApiKey(key);
       localStorage.setItem(API_KEY_STORAGE_KEY, key);
@@ -41,6 +45,14 @@ export default function Home() {
       setIsLoading(false);
     }
   }, []);
+
+    const handleDateRangeChange = useCallback(async (range: DateRange) => {
+        setDateRange(range);
+        currentDateRangeRef.current = range;
+        if (apiKey) {
+            await handleConnect(apiKey, range);
+        }
+    }, [apiKey, handleConnect]);
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem(API_KEY_STORAGE_KEY);
@@ -69,6 +81,8 @@ export default function Home() {
     return (
       <Dashboard
         data={data}
+        dateRange={dateRange}
+        onDateRangeChange={handleDateRangeChange}
         onLogout={handleLogout}
         onRefresh={handleRefresh}
         isRefreshing={isLoading}

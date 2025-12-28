@@ -2,7 +2,8 @@
 
 import {useMemo, useState} from "react";
 import {UsageResponse} from "@/lib/types";
-import {filterDataByDateRange, getAvailableDates, transformToChartData, transformToHourlyData} from "@/lib/utils";
+import {DateRange} from "@/lib/api";
+import {getAvailableDates, transformToChartData, transformToHourlyData} from "@/lib/utils";
 import {StatsCard} from "./stats-card";
 import {UsageChart} from "./usage-chart";
 import {HourlyChart} from "./hourly-chart";
@@ -12,35 +13,46 @@ import {Activity, BookOpen, LogOut, MessageSquare, RefreshCw, User, Users} from 
 
 interface DashboardProps {
   data: UsageResponse;
+    dateRange: DateRange;
+    onDateRangeChange: (range: DateRange) => void;
   onLogout: () => void;
   onRefresh: () => void;
   isRefreshing: boolean;
 }
 
-export function Dashboard({ data, onLogout, onRefresh, isRefreshing }: DashboardProps) {
+export function Dashboard({data, dateRange, onDateRangeChange, onLogout, onRefresh, isRefreshing}: DashboardProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [dateRange, setDateRange] = useState<{ start: Date | null; end: Date | null }>({
-    start: null,
-    end: null,
-  });
 
   const availableDates = useMemo(() => getAvailableDates(data), [data]);
 
-  // Filter data by date range
-  const filteredData = useMemo(() => {
-    if (!dateRange.start || !dateRange.end) {
-      return data;
+    // Convert DateRange (string) to Date objects for the picker
+    const pickerDateRange = useMemo(() => ({
+        start: new Date(dateRange.from + "T00:00:00"),
+        end: new Date(dateRange.to + "T23:59:59"),
+    }), [dateRange]);
+
+    const handleDateRangeChange = (range: { start: Date | null; end: Date | null }) => {
+        if (range.start && range.end) {
+            const formatDate = (d: Date) => {
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, "0");
+                const day = String(d.getDate()).padStart(2, "0");
+                return `${year}-${month}-${day}`;
+            };
+            onDateRangeChange({
+                from: formatDate(range.start),
+                to: formatDate(range.end),
+            });
     }
-    return filterDataByDateRange(data, dateRange.start, dateRange.end);
-  }, [data, dateRange]);
+    };
 
-  const chartData = useMemo(() => transformToChartData(filteredData), [filteredData]);
-  const hourlyData = selectedDate ? transformToHourlyData(filteredData, selectedDate) : null;
+    const chartData = useMemo(() => transformToChartData(data, dateRange), [data, dateRange]);
+    const hourlyData = selectedDate ? transformToHourlyData(data, selectedDate) : null;
 
-  // Calculate endpoint totals from filtered data
-  const tweetTotal = filteredData.endpoints["/tweet"]?.total || 0;
-  const userTotal = filteredData.endpoints["/user"]?.total || 0;
-  const communityTotal = filteredData.endpoints["/community"]?.total || 0;
+    // Calculate endpoint totals
+    const tweetTotal = data.endpoints["/tweet"]?.total || 0;
+    const userTotal = data.endpoints["/user"]?.total || 0;
+    const communityTotal = data.endpoints["/community"]?.total || 0;
 
   return (
     <div className="min-h-screen bg-[hsl(var(--background))]">
@@ -96,9 +108,9 @@ export function Dashboard({ data, onLogout, onRefresh, isRefreshing }: Dashboard
         {/* Date Range Picker */}
         <div className="mb-6">
           <DateRangePicker
-            startDate={dateRange.start}
-            endDate={dateRange.end}
-            onChange={setDateRange}
+              startDate={pickerDateRange.start}
+              endDate={pickerDateRange.end}
+              onChange={handleDateRangeChange}
             availableDates={availableDates}
           />
         </div>
@@ -107,7 +119,7 @@ export function Dashboard({ data, onLogout, onRefresh, isRefreshing }: Dashboard
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatsCard
             title="Total API Calls"
-            value={filteredData.total}
+            value={data.total}
             icon={Activity}
             description="All endpoints"
           />
@@ -145,7 +157,7 @@ export function Dashboard({ data, onLogout, onRefresh, isRefreshing }: Dashboard
             )}
           </div>
           <div>
-            <EndpointBreakdown data={filteredData} />
+              <EndpointBreakdown data={data}/>
           </div>
         </div>
 

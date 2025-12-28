@@ -1,4 +1,5 @@
 import {ChartDataPoint, HourlyDataPoint, UsageResponse} from "./types";
+import {DateRange} from "./api";
 
 export function formatNumber(num: number): string {
   if (num >= 1000000) {
@@ -10,10 +11,25 @@ export function formatNumber(num: number): string {
   return num.toLocaleString();
 }
 
-export function transformToChartData(data: UsageResponse): ChartDataPoint[] {
+export function transformToChartData(data: UsageResponse, dateRange: DateRange): ChartDataPoint[] {
   const dateMap = new Map<string, ChartDataPoint>();
 
-  // Collect all dates from all endpoints
+    // Initialize all days in the range with zero values
+    const startDate = new Date(dateRange.from + "T00:00:00");
+    const endDate = new Date(dateRange.to + "T00:00:00");
+
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        const dateStr = d.toISOString().split("T")[0];
+        dateMap.set(dateStr, {
+            date: dateStr,
+            tweet: 0,
+            user: 0,
+            community: 0,
+            total: 0,
+        });
+    }
+
+    // Fill in actual data from endpoints
   for (const [endpoint, endpointData] of Object.entries(data.endpoints)) {
     for (const [date, dayData] of Object.entries(endpointData.days)) {
       if (!dateMap.has(date)) {
@@ -87,44 +103,3 @@ export function formatDate(dateStr: string): string {
   });
 }
 
-export function filterDataByDateRange(
-  data: UsageResponse,
-  startDate: Date,
-  endDate: Date
-): UsageResponse {
-  const startStr = formatDateString(startDate);
-  const endStr = formatDateString(endDate);
-
-  const filteredEndpoints: UsageResponse["endpoints"] = {};
-  let filteredTotal = 0;
-
-  for (const [endpoint, endpointData] of Object.entries(data.endpoints)) {
-    const filteredDays: typeof endpointData.days = {};
-    let endpointTotal = 0;
-
-    for (const [date, dayData] of Object.entries(endpointData.days)) {
-      if (date >= startStr && date <= endStr) {
-        filteredDays[date] = dayData;
-        endpointTotal += dayData.total;
-      }
-    }
-
-    filteredEndpoints[endpoint] = {
-      total: endpointTotal,
-      days: filteredDays,
-    };
-    filteredTotal += endpointTotal;
-  }
-
-  return {
-    total: filteredTotal,
-    endpoints: filteredEndpoints,
-  };
-}
-
-function formatDateString(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
