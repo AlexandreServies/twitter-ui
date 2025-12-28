@@ -79,10 +79,6 @@ export function ApiKeyInput({ apiKey, onSubmit, isLoading, error }: ApiKeyInputP
             )}
           </button>
         </form>
-
-        <p className="mt-6 text-center text-sm text-[hsl(var(--muted-foreground))]">
-          Your API key is stored locally in your browser
-        </p>
       </div>
     </div>
   );
