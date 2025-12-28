@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { UsageResponse } from "@/lib/types";
-import { transformToChartData, transformToHourlyData, getAvailableDates, filterDataByDateRange } from "@/lib/utils";
-import { StatsCard } from "./stats-card";
-import { UsageChart } from "./usage-chart";
-import { HourlyChart } from "./hourly-chart";
-import { EndpointBreakdown } from "./endpoint-breakdown";
-import { DateRangePicker } from "./date-range-picker";
-import { Activity, MessageSquare, User, Users, LogOut, RefreshCw } from "lucide-react";
+import {useMemo, useState} from "react";
+import {UsageResponse} from "@/lib/types";
+import {filterDataByDateRange, getAvailableDates, transformToChartData, transformToHourlyData} from "@/lib/utils";
+import {StatsCard} from "./stats-card";
+import {UsageChart} from "./usage-chart";
+import {HourlyChart} from "./hourly-chart";
+import {EndpointBreakdown} from "./endpoint-breakdown";
+import {DateRangePicker} from "./date-range-picker";
+import {Activity, BookOpen, LogOut, MessageSquare, RefreshCw, User, Users} from "lucide-react";
 
 interface DashboardProps {
   data: UsageResponse;
@@ -62,6 +62,15 @@ export function Dashboard({ data, onLogout, onRefresh, isRefreshing }: Dashboard
               </div>
             </div>
             <div className="flex items-center gap-3">
+                <a
+                    href="https://twitter.bark.gg/swagger-ui/index.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-lg hover:bg-[hsl(var(--muted))] transition-colors"
+                    title="API Docs"
+                >
+                    <BookOpen className="w-5 h-5 text-[hsl(var(--muted-foreground))]"/>
+                </a>
               <button
                 onClick={onRefresh}
                 disabled={isRefreshing}
