@@ -19,9 +19,9 @@ interface UsageChartProps {
 }
 
 const COLORS = {
-  tweet: "hsl(43, 92%, 55%)",
-  user: "hsl(43, 70%, 45%)",
-  community: "hsl(38, 80%, 50%)",
+  tweet: "hsl(43, 92%, 55%)",      // Gold
+  user: "hsl(168, 76%, 42%)",      // Teal
+  community: "hsl(270, 70%, 60%)", // Purple
 };
 
 export function UsageChart({ data, onDateClick }: UsageChartProps) {
@@ -41,8 +41,10 @@ export function UsageChart({ data, onDateClick }: UsageChartProps) {
             data={data}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
             onClick={(e) => {
-              if (e?.activePayload?.[0]?.payload?.date && onDateClick) {
-                onDateClick(e.activePayload[0].payload.date);
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const payload = (e as any)?.activePayload?.[0]?.payload;
+              if (payload?.date && onDateClick) {
+                onDateClick(payload.date);
               }
             }}
           >
@@ -91,7 +93,7 @@ export function UsageChart({ data, onDateClick }: UsageChartProps) {
               labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
               itemStyle={{ color: "hsl(var(--foreground))" }}
               labelFormatter={(value) => formatDate(value as string)}
-              formatter={(value: number) => [formatNumber(value), ""]}
+              formatter={(value, name) => [formatNumber(value as number), name]}
               cursor={{ stroke: "hsl(var(--primary))", strokeWidth: 1 }}
             />
             <Legend

@@ -87,3 +87,45 @@ export function formatDate(dateStr: string): string {
     day: "numeric",
   });
 }
+
+export function filterDataByDateRange(
+  data: UsageResponse,
+  startDate: Date,
+  endDate: Date
+): UsageResponse {
+  const startStr = formatDateString(startDate);
+  const endStr = formatDateString(endDate);
+
+  const filteredEndpoints: UsageResponse["endpoints"] = {};
+  let filteredTotal = 0;
+
+  for (const [endpoint, endpointData] of Object.entries(data.endpoints)) {
+    const filteredDays: typeof endpointData.days = {};
+    let endpointTotal = 0;
+
+    for (const [date, dayData] of Object.entries(endpointData.days)) {
+      if (date >= startStr && date <= endStr) {
+        filteredDays[date] = dayData;
+        endpointTotal += dayData.total;
+      }
+    }
+
+    filteredEndpoints[endpoint] = {
+      total: endpointTotal,
+      days: filteredDays,
+    };
+    filteredTotal += endpointTotal;
+  }
+
+  return {
+    total: filteredTotal,
+    endpoints: filteredEndpoints,
+  };
+}
+
+function formatDateString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}

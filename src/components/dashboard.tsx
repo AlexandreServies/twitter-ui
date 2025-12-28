@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { UsageResponse } from "@/lib/types";
-import { transformToChartData, transformToHourlyData, getAvailableDates } from "@/lib/utils";
+import { transformToChartData, transformToHourlyData, getAvailableDates, filterDataByDateRange } from "@/lib/utils";
 import { StatsCard } from "./stats-card";
 import { UsageChart } from "./usage-chart";
 import { HourlyChart } from "./hourly-chart";
 import { EndpointBreakdown } from "./endpoint-breakdown";
+import { DateRangePicker } from "./date-range-picker";
 import { Activity, MessageSquare, User, Users, LogOut, RefreshCw } from "lucide-react";
 
 interface DashboardProps {
@@ -18,15 +19,28 @@ interface DashboardProps {
 
 export function Dashboard({ data, onLogout, onRefresh, isRefreshing }: DashboardProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState<{ start: Date | null; end: Date | null }>({
+    start: null,
+    end: null,
+  });
 
-  const chartData = transformToChartData(data);
-  const availableDates = getAvailableDates(data);
-  const hourlyData = selectedDate ? transformToHourlyData(data, selectedDate) : null;
+  const availableDates = useMemo(() => getAvailableDates(data), [data]);
 
-  // Calculate endpoint totals
-  const tweetTotal = data.endpoints["/tweet"]?.total || 0;
-  const userTotal = data.endpoints["/user"]?.total || 0;
-  const communityTotal = data.endpoints["/community"]?.total || 0;
+  // Filter data by date range
+  const filteredData = useMemo(() => {
+    if (!dateRange.start || !dateRange.end) {
+      return data;
+    }
+    return filterDataByDateRange(data, dateRange.start, dateRange.end);
+  }, [data, dateRange]);
+
+  const chartData = useMemo(() => transformToChartData(filteredData), [filteredData]);
+  const hourlyData = selectedDate ? transformToHourlyData(filteredData, selectedDate) : null;
+
+  // Calculate endpoint totals from filtered data
+  const tweetTotal = filteredData.endpoints["/tweet"]?.total || 0;
+  const userTotal = filteredData.endpoints["/user"]?.total || 0;
+  const communityTotal = filteredData.endpoints["/community"]?.total || 0;
 
   return (
     <div className="min-h-screen bg-[hsl(var(--background))]">
@@ -47,7 +61,13 @@ export function Dashboard({ data, onLogout, onRefresh, isRefreshing }: Dashboard
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <DateRangePicker
+                startDate={dateRange.start}
+                endDate={dateRange.end}
+                onChange={setDateRange}
+                availableDates={availableDates}
+              />
               <button
                 onClick={onRefresh}
                 disabled={isRefreshing}
@@ -74,7 +94,7 @@ export function Dashboard({ data, onLogout, onRefresh, isRefreshing }: Dashboard
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatsCard
             title="Total API Calls"
-            value={data.total}
+            value={filteredData.total}
             icon={Activity}
             description="All endpoints"
           />
@@ -112,36 +132,10 @@ export function Dashboard({ data, onLogout, onRefresh, isRefreshing }: Dashboard
             )}
           </div>
           <div>
-            <EndpointBreakdown data={data} />
+            <EndpointBreakdown data={filteredData} />
           </div>
         </div>
 
-        {/* Date Selector Pills */}
-        {availableDates.length > 0 && (
-          <div className="p-6 rounded-xl bg-[hsl(var(--card))] border border-[hsl(var(--border))]">
-            <h3 className="text-lg font-semibold text-[hsl(var(--foreground))] mb-4">
-              Quick Date Access
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {availableDates.slice(0, 14).map((date) => (
-                <button
-                  key={date}
-                  onClick={() => setSelectedDate(selectedDate === date ? null : date)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                    selectedDate === date
-                      ? "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]"
-                      : "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted-foreground)/0.2)]"
-                  }`}
-                >
-                  {new Date(date).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </main>
 
       {/* Footer */}

@@ -21,9 +21,9 @@ interface HourlyChartProps {
 }
 
 const COLORS = {
-  tweet: "hsl(43, 92%, 55%)",
-  user: "hsl(43, 70%, 45%)",
-  community: "hsl(38, 80%, 50%)",
+  tweet: "hsl(43, 92%, 55%)",      // Gold
+  user: "hsl(168, 76%, 42%)",      // Teal
+  community: "hsl(270, 70%, 60%)", // Purple
 };
 
 export function HourlyChart({ data, selectedDate, onClose }: HourlyChartProps) {
@@ -64,7 +64,8 @@ export function HourlyChart({ data, selectedDate, onClose }: HourlyChartProps) {
               fontSize={11}
               tickLine={false}
               axisLine={false}
-              interval={2}
+              interval={1}
+              tick={{ fontSize: 10 }}
             />
             <YAxis
               tickFormatter={(value) => formatNumber(value)}
@@ -83,7 +84,7 @@ export function HourlyChart({ data, selectedDate, onClose }: HourlyChartProps) {
               }}
               labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
               itemStyle={{ color: "hsl(var(--foreground))" }}
-              formatter={(value: number) => [formatNumber(value), ""]}
+              formatter={(value, name) => [formatNumber(value as number), name]}
               cursor={{ fill: "hsl(var(--muted) / 0.3)" }}
             />
             <Legend

@@ -12,17 +12,17 @@ const ENDPOINT_CONFIG = {
   "/tweet": {
     icon: MessageSquare,
     label: "Tweet",
-    color: "hsl(43, 92%, 55%)",
+    color: "hsl(43, 92%, 55%)",      // Gold
   },
   "/user": {
     icon: User,
     label: "User",
-    color: "hsl(43, 70%, 45%)",
+    color: "hsl(168, 76%, 42%)",     // Teal
   },
   "/community": {
     icon: Users,
     label: "Community",
-    color: "hsl(38, 80%, 50%)",
+    color: "hsl(270, 70%, 60%)",     // Purple
   },
 };
 
