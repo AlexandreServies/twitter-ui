@@ -1,4 +1,4 @@
-import { UsageResponse, ChartDataPoint, HourlyDataPoint } from "./types";
+import {ChartDataPoint, HourlyDataPoint, UsageResponse} from "./types";
 
 export function formatNumber(num: number): string {
   if (num >= 1000000) {
@@ -82,7 +82,6 @@ export function getAvailableDates(data: UsageResponse): string[] {
 export function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
   return date.toLocaleDateString("en-US", {
-    weekday: "short",
     month: "short",
     day: "numeric",
   });
