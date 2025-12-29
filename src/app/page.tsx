@@ -86,6 +86,7 @@ export default function Home() {
         onLogout={handleLogout}
         onRefresh={handleRefresh}
         isRefreshing={isLoading}
+        apiKey={apiKey}
       />
     );
   }

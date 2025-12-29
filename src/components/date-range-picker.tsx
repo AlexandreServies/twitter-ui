@@ -25,8 +25,6 @@ export function DateRangePicker({ startDate, endDate, onChange, availableDates }
     const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([startDate, endDate]);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const availableDateSet = new Set(availableDates);
-
     useEffect(() => {
         setDateRange([startDate, endDate]);
     }, [startDate, endDate]);
@@ -76,11 +74,6 @@ export function DateRangePicker({ startDate, endDate, onChange, availableDates }
     return "Select date range";
   };
 
-  const isDateAvailable = (date: Date) => {
-    const dateStr = format(date, "yyyy-MM-dd");
-    return availableDateSet.has(dateStr);
-  };
-
   return (
       <div ref={containerRef} className="relative inline-block date-picker-wrapper">
       <button
@@ -120,7 +113,6 @@ export function DateRangePicker({ startDate, endDate, onChange, availableDates }
                     startDate={dateRange[0]}
                     endDate={dateRange[1]}
                     onChange={handleDateChange}
-                    filterDate={isDateAvailable}
                     inline
                     monthsShown={1}
                     calendarClassName="dark-calendar"

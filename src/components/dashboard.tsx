@@ -2,14 +2,14 @@
 
 import {useMemo, useState} from "react";
 import {UsageResponse} from "@/lib/types";
-import {DateRange} from "@/lib/api";
+import {DateRange, sendEmergencyAlert} from "@/lib/api";
 import {getAvailableDates, transformToChartData, transformToHourlyData} from "@/lib/utils";
 import {StatsCard} from "./stats-card";
 import {UsageChart} from "./usage-chart";
 import {HourlyChart} from "./hourly-chart";
 import {EndpointBreakdown} from "./endpoint-breakdown";
 import {DateRangePicker} from "./date-range-picker";
-import {Activity, BookOpen, LogOut, MessageSquare, RefreshCw, User, Users} from "lucide-react";
+import {Activity, AlertTriangle, BookOpen, LogOut, MessageSquare, RefreshCw, User, Users} from "lucide-react";
 
 interface DashboardProps {
   data: UsageResponse;
@@ -18,10 +18,33 @@ interface DashboardProps {
   onLogout: () => void;
   onRefresh: () => void;
   isRefreshing: boolean;
+    apiKey: string;
 }
 
-export function Dashboard({data, dateRange, onDateRangeChange, onLogout, onRefresh, isRefreshing}: DashboardProps) {
+export function Dashboard({
+                              data,
+                              dateRange,
+                              onDateRangeChange,
+                              onLogout,
+                              onRefresh,
+                              isRefreshing,
+                              apiKey
+                          }: DashboardProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+    const [showEmergencyConfirm, setShowEmergencyConfirm] = useState(false);
+    const [emergencySending, setEmergencySending] = useState(false);
+
+    const handleEmergencyAlert = async () => {
+        setEmergencySending(true);
+        try {
+            await sendEmergencyAlert(apiKey);
+            setShowEmergencyConfirm(false);
+        } catch (error) {
+            console.error("Failed to send emergency alert:", error);
+        } finally {
+            setEmergencySending(false);
+        }
+    };
 
   const availableDates = useMemo(() => getAvailableDates(data), [data]);
 
@@ -74,6 +97,14 @@ export function Dashboard({data, dateRange, onDateRangeChange, onLogout, onRefre
               </div>
             </div>
             <div className="flex items-center gap-3">
+                <button
+                    onClick={() => setShowEmergencyConfirm(true)}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 transition-colors"
+                    title="Emergency Alert"
+                >
+                    <AlertTriangle className="w-4 h-4 text-white"/>
+                    <span className="text-sm font-medium text-white">Emergency</span>
+                </button>
                 <a
                     href="https://twitter.bark.gg/swagger-ui/index.html"
                     target="_blank"
@@ -179,6 +210,43 @@ export function Dashboard({data, dateRange, onDateRangeChange, onLogout, onRefre
           </p>
         </div>
       </footer>
+
+        {/* Emergency Confirmation Modal */}
+        {showEmergencyConfirm && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                <div
+                    className="bg-[hsl(var(--background))] border border-[hsl(var(--border))] rounded-lg p-6 max-w-md mx-4 shadow-xl">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 rounded-full bg-red-100">
+                            <AlertTriangle className="w-6 h-6 text-red-600"/>
+                        </div>
+                        <h3 className="text-lg font-semibold text-[hsl(var(--foreground))]">
+                            Emergency Alert
+                        </h3>
+                    </div>
+                    <p className="text-[hsl(var(--muted-foreground))] mb-6">
+                        Are you sure you want to send an emergency alert? This will send a high-priority notification
+                        immediately.
+                    </p>
+                    <div className="flex gap-3 justify-end">
+                        <button
+                            onClick={() => setShowEmergencyConfirm(false)}
+                            disabled={emergencySending}
+                            className="px-4 py-2 rounded-lg border border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))] transition-colors disabled:opacity-50"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handleEmergencyAlert}
+                            disabled={emergencySending}
+                            className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-colors disabled:opacity-50"
+                        >
+                            {emergencySending ? "Sending..." : "Send Alert"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
     </div>
   );
 }
