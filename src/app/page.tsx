@@ -3,14 +3,15 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 import {ApiKeyInput} from "@/components/api-key-input";
 import {Dashboard} from "@/components/dashboard";
-import {UsageResponse} from "@/lib/types";
-import {DateRange, fetchUsage, getDefaultDateRange} from "@/lib/api";
+import {MetricsResponse, UsageResponse} from "@/lib/types";
+import {DateRange, fetchMetrics, fetchUsage, getDefaultDateRange} from "@/lib/api";
 
 const API_KEY_STORAGE_KEY = "twitter-api-key";
 
 export default function Home() {
   const [apiKey, setApiKey] = useState<string>("");
   const [data, setData] = useState<UsageResponse | null>(null);
+    const [metrics, setMetrics] = useState<MetricsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -34,13 +35,18 @@ export default function Home() {
         const effectiveRange = range || currentDateRangeRef.current;
 
     try {
-        const usageData = await fetchUsage(key, effectiveRange);
+        const [usageData, metricsData] = await Promise.all([
+            fetchUsage(key, effectiveRange),
+            fetchMetrics(key),
+        ]);
       setData(usageData);
+        setMetrics(metricsData);
       setApiKey(key);
       localStorage.setItem(API_KEY_STORAGE_KEY, key);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to connect");
       setData(null);
+        setMetrics(null);
     } finally {
       setIsLoading(false);
     }
@@ -58,6 +64,7 @@ export default function Home() {
     localStorage.removeItem(API_KEY_STORAGE_KEY);
     setApiKey("");
     setData(null);
+      setMetrics(null);
     setError(null);
   }, []);
 
@@ -81,6 +88,7 @@ export default function Home() {
     return (
       <Dashboard
         data={data}
+        metrics={metrics}
         dateRange={dateRange}
         onDateRangeChange={handleDateRangeChange}
         onLogout={handleLogout}

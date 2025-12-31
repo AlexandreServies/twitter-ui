@@ -1,29 +1,31 @@
 "use client";
 
-import { LucideIcon } from "lucide-react";
-import { formatNumber } from "@/lib/utils";
+import {LucideIcon} from "lucide-react";
+import {formatNumber} from "@/lib/utils";
 
 interface StatsCardProps {
   title: string;
   value: number;
   icon: LucideIcon;
   description?: string;
+    medianMs?: number;
   trend?: {
     value: number;
     isPositive: boolean;
   };
 }
 
-export function StatsCard({ title, value, icon: Icon, description, trend }: StatsCardProps) {
+export function StatsCard({title, value, icon: Icon, description, medianMs, trend}: StatsCardProps) {
   return (
     <div className="p-6 rounded-xl bg-[hsl(var(--card))] border border-[hsl(var(--border))] hover:border-[hsl(var(--primary)/0.3)] transition-colors">
-      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3 mb-4">
         <div className="p-2 rounded-lg bg-[hsl(var(--primary)/0.1)]">
           <Icon className="w-5 h-5 text-[hsl(var(--primary))]" />
         </div>
+            <p className="text-base font-medium text-[hsl(var(--foreground))]">{title}</p>
         {trend && (
           <span
-            className={`text-sm font-medium ${
+              className={`text-sm font-medium ml-auto ${
               trend.isPositive ? "text-green-500" : "text-red-500"
             }`}
           >
@@ -32,12 +34,15 @@ export function StatsCard({ title, value, icon: Icon, description, trend }: Stat
         )}
       </div>
       <div className="space-y-1">
-        <p className="text-sm text-[hsl(var(--muted-foreground))]">{title}</p>
-        <p className="text-3xl font-bold text-[hsl(var(--foreground))]">
-          {formatNumber(value)}
+          <p className="text-2xl text-[hsl(var(--foreground))]">
+              <span className="font-bold">{formatNumber(value)}</span>
+              <span className="text-base text-[hsl(var(--muted-foreground))]"> calls</span>
         </p>
-        {description && (
-          <p className="text-sm text-[hsl(var(--muted-foreground))]">{description}</p>
+          {medianMs !== undefined && (
+              <p className="text-xl text-[hsl(var(--foreground))]">
+                  <span className="font-bold">{Math.round(medianMs)}ms</span>
+                  <span className="text-sm text-[hsl(var(--muted-foreground))]"> latency</span>
+              </p>
         )}
       </div>
     </div>

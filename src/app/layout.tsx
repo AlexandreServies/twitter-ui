@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type {Metadata} from "next";
+import {Geist, Geist_Mono} from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Twitter API Dashboard | Bark",
-  description: "Track your Twitter API usage with beautiful visualizations",
+    description: "Track your Twitter API usage and speed",
 };
 
 export default function RootLayout({

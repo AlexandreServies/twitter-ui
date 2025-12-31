@@ -28,3 +28,16 @@ export interface HourlyDataPoint {
   community: number;
   total: number;
 }
+
+export interface EndpointMetrics {
+    count: number;
+    meanMs: number;
+    maxMs: number;
+    p50Ms: number;
+    p95Ms: number;
+    p99Ms: number;
+}
+
+export interface MetricsResponse {
+    [endpoint: string]: EndpointMetrics;
+}

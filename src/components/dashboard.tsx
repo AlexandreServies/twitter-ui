@@ -1,7 +1,7 @@
 "use client";
 
 import {useMemo, useState} from "react";
-import {UsageResponse} from "@/lib/types";
+import {MetricsResponse, UsageResponse} from "@/lib/types";
 import {DateRange, sendEmergencyAlert} from "@/lib/api";
 import {getAvailableDates, transformToChartData, transformToHourlyData} from "@/lib/utils";
 import {StatsCard} from "./stats-card";
@@ -13,6 +13,7 @@ import {Activity, AlertTriangle, BookOpen, LogOut, MessageSquare, RefreshCw, Use
 
 interface DashboardProps {
   data: UsageResponse;
+    metrics: MetricsResponse | null;
     dateRange: DateRange;
     onDateRangeChange: (range: DateRange) => void;
   onLogout: () => void;
@@ -23,6 +24,7 @@ interface DashboardProps {
 
 export function Dashboard({
                               data,
+                              metrics,
                               dateRange,
                               onDateRangeChange,
                               onLogout,
@@ -149,25 +151,27 @@ export function Dashboard({
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatsCard
-            title="Total API Calls"
+              title="All Endpoints"
             value={data.total}
             icon={Activity}
-            description="All endpoints"
           />
           <StatsCard
-            title="Tweet Lookups"
+              title="Tweets"
             value={tweetTotal}
             icon={MessageSquare}
+              medianMs={metrics?.["/tweet/{id}"]?.p50Ms}
           />
           <StatsCard
-            title="User Lookups"
+              title="Users"
             value={userTotal}
             icon={User}
+              medianMs={metrics?.["/user/{idOrHandle}"]?.p50Ms}
           />
           <StatsCard
-            title="Community Lookups"
+              title="Communities"
             value={communityTotal}
             icon={Users}
+              medianMs={metrics?.["/community/{id}"]?.p50Ms}
           />
         </div>
 

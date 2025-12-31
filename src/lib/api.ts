@@ -1,4 +1,4 @@
-import {UsageResponse} from "./types";
+import {MetricsResponse, UsageResponse} from "./types";
 
 const API_BASE_URL = "https://twitter.bark.gg";
 
@@ -49,6 +49,20 @@ export async function fetchUsage(apiKey: string, dateRange?: DateRange): Promise
   }
 
   return response.json();
+}
+
+export async function fetchMetrics(apiKey: string): Promise<MetricsResponse> {
+    const response = await fetch(`${API_BASE_URL}/metrics`, {
+        headers: {
+            "x-api-key": apiKey,
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+    }
+
+    return response.json();
 }
 
 export async function sendEmergencyAlert(apiKey: string): Promise<void> {
