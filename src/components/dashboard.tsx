@@ -9,7 +9,7 @@ import {UsageChart} from "./usage-chart";
 import {HourlyChart} from "./hourly-chart";
 import {EndpointBreakdown} from "./endpoint-breakdown";
 import {DateRangePicker} from "./date-range-picker";
-import {Activity, AlertTriangle, BookOpen, LogOut, MessageSquare, RefreshCw, User, Users} from "lucide-react";
+import {Activity, AlertTriangle, BookOpen, Coins, LogOut, MessageSquare, RefreshCw, User, Users} from "lucide-react";
 
 interface DashboardProps {
   data: UsageResponse;
@@ -138,6 +138,16 @@ export function Dashboard({
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Credits Card */}
+        <div className="mb-6">
+          <StatsCard
+            title="Credits Remaining"
+            value={data.creditsRemaining}
+            icon={Coins}
+            unit="credits"
+          />
+        </div>
+
         {/* Date Range Picker */}
         <div className="mb-6">
           <DateRangePicker

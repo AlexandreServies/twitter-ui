@@ -10,6 +10,7 @@ export interface EndpointUsage {
 
 export interface UsageResponse {
   total: number;
+  creditsRemaining: number;
   endpoints: Record<string, EndpointUsage>;
 }
 

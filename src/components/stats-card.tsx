@@ -9,13 +9,14 @@ interface StatsCardProps {
   icon: LucideIcon;
   description?: string;
     medianMs?: number;
+  unit?: string;
   trend?: {
     value: number;
     isPositive: boolean;
   };
 }
 
-export function StatsCard({title, value, icon: Icon, description, medianMs, trend}: StatsCardProps) {
+export function StatsCard({title, value, icon: Icon, description, medianMs, unit = "calls", trend}: StatsCardProps) {
   return (
     <div className="p-6 rounded-xl bg-[hsl(var(--card))] border border-[hsl(var(--border))] hover:border-[hsl(var(--primary)/0.3)] transition-colors">
         <div className="flex items-center gap-3 mb-4">
@@ -36,7 +37,7 @@ export function StatsCard({title, value, icon: Icon, description, medianMs, tren
       <div className="space-y-1">
           <p className="text-2xl text-[hsl(var(--foreground))]">
               <span className="font-bold">{formatNumber(value)}</span>
-              <span className="text-base text-[hsl(var(--muted-foreground))]"> calls</span>
+              <span className="text-base text-[hsl(var(--muted-foreground))]"> {unit}</span>
         </p>
           {medianMs !== undefined && (
               <p className="text-xl text-[hsl(var(--foreground))]">
