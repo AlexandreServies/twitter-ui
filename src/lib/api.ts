@@ -9,12 +9,14 @@ export interface DateRange {
 
 export function getDefaultDateRange(): DateRange {
     const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
     const thirtyDaysAgo = new Date(today);
     thirtyDaysAgo.setDate(today.getDate() - 29);
 
     return {
         from: formatDateParam(thirtyDaysAgo),
-        to: formatDateParam(today),
+        to: formatDateParam(tomorrow),
     };
 }
 
