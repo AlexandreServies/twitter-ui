@@ -5,7 +5,6 @@ import {ApiKeyInput} from "@/components/api-key-input";
 import {Dashboard} from "@/components/dashboard";
 import {MetricsResponse, UsageResponse} from "@/lib/types";
 import {DateRange, fetchMetrics, fetchUsage, getDefaultDateRange} from "@/lib/api";
-import {getDateRangeFromData} from "@/lib/utils";
 
 const API_KEY_STORAGE_KEY = "twitter-api-key";
 
@@ -24,12 +23,12 @@ export default function Home() {
     const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
     if (savedKey) {
       setApiKey(savedKey);
-        handleConnect(savedKey, undefined, true);
+        handleConnect(savedKey);
     }
     setIsInitialized(true);
   }, []);
 
-    const handleConnect = useCallback(async (key: string, range?: DateRange, isInitialLoad = false) => {
+    const handleConnect = useCallback(async (key: string, range?: DateRange) => {
     setIsLoading(true);
     setError(null);
 
@@ -40,15 +39,6 @@ export default function Home() {
             fetchUsage(key, effectiveRange),
             fetchMetrics(key),
         ]);
-
-        // On initial load, calculate the proper date range from data
-        if (isInitialLoad) {
-            const dataRange = getDateRangeFromData(usageData);
-            if (dataRange) {
-                setDateRange(dataRange);
-                currentDateRangeRef.current = dataRange;
-            }
-        }
 
       setData(usageData);
         setMetrics(metricsData);
@@ -114,7 +104,7 @@ export default function Home() {
   return (
     <ApiKeyInput
       apiKey={apiKey}
-      onSubmit={(key) => handleConnect(key, undefined, true)}
+      onSubmit={handleConnect}
       isLoading={isLoading}
       error={error}
     />

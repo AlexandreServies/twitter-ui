@@ -93,37 +93,6 @@ export function getAvailableDates(data: UsageResponse): string[] {
   return Array.from(dates).sort((a, b) => b.localeCompare(a)); // Most recent first
 }
 
-export function getDateRangeFromData(data: UsageResponse): DateRange | null {
-    let lastDate: string | null = null;
-
-    for (const endpointData of Object.values(data.endpoints)) {
-        for (const date of Object.keys(endpointData.days)) {
-            if (!lastDate || date > lastDate) {
-                lastDate = date;
-            }
-        }
-    }
-
-    if (!lastDate) return null;
-
-    // Calculate 30 days before the last date
-    const endDate = new Date(lastDate + "T00:00:00");
-    const startDate = new Date(endDate);
-    startDate.setDate(endDate.getDate() - 29);
-
-    const formatDate = (d: Date) => {
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, "0");
-        const day = String(d.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
-    };
-
-    return {
-        from: formatDate(startDate),
-        to: lastDate,
-    };
-}
-
 export function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
   return date.toLocaleDateString("en-US", {
