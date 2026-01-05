@@ -8,9 +8,19 @@ export function formatNumber(num: number): string {
 export function transformToChartData(data: UsageResponse, dateRange: DateRange): ChartDataPoint[] {
   const dateMap = new Map<string, ChartDataPoint>();
 
-    // Initialize all days in the range with zero values
+    // Find the last date with actual data
+    let lastDateWithData = dateRange.from;
+    for (const endpointData of Object.values(data.endpoints)) {
+        for (const date of Object.keys(endpointData.days)) {
+            if (date > lastDateWithData && date <= dateRange.to) {
+                lastDateWithData = date;
+            }
+        }
+    }
+
+    // Initialize all days from start to last date with data
     const startDate = new Date(dateRange.from + "T00:00:00");
-    const endDate = new Date(dateRange.to + "T00:00:00");
+    const endDate = new Date(lastDateWithData + "T00:00:00");
 
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
         const dateStr = d.toISOString().split("T")[0];
@@ -27,16 +37,7 @@ export function transformToChartData(data: UsageResponse, dateRange: DateRange):
     // Fill in actual data from endpoints
   for (const [endpoint, endpointData] of Object.entries(data.endpoints)) {
     for (const [date, dayData] of Object.entries(endpointData.days)) {
-      if (!dateMap.has(date)) {
-        dateMap.set(date, {
-          date,
-          tweet: 0,
-          user: 0,
-          community: 0,
-            follows: 0,
-          total: 0,
-        });
-      }
+        if (!dateMap.has(date)) continue;
       const point = dateMap.get(date)!;
         const endpointKey = endpoint.replace("/", "") as "tweet" | "user" | "community" | "follows";
       point[endpointKey] = dayData.total;
@@ -90,6 +91,37 @@ export function getAvailableDates(data: UsageResponse): string[] {
     }
   }
   return Array.from(dates).sort((a, b) => b.localeCompare(a)); // Most recent first
+}
+
+export function getDateRangeFromData(data: UsageResponse): DateRange | null {
+    let lastDate: string | null = null;
+
+    for (const endpointData of Object.values(data.endpoints)) {
+        for (const date of Object.keys(endpointData.days)) {
+            if (!lastDate || date > lastDate) {
+                lastDate = date;
+            }
+        }
+    }
+
+    if (!lastDate) return null;
+
+    // Calculate 30 days before the last date
+    const endDate = new Date(lastDate + "T00:00:00");
+    const startDate = new Date(endDate);
+    startDate.setDate(endDate.getDate() - 29);
+
+    const formatDate = (d: Date) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    };
+
+    return {
+        from: formatDate(startDate),
+        to: lastDate,
+    };
 }
 
 export function formatDate(dateStr: string): string {
