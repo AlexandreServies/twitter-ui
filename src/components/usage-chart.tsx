@@ -24,7 +24,7 @@ export function UsageChart({ data, onDateClick }: UsageChartProps) {
           Daily Usage
         </h3>
         <p className="text-sm text-[hsl(var(--muted-foreground))]">
-          API calls per day by endpoint
+            API credits per day by endpoint
         </p>
       </div>
       <div className="h-[300px]">

@@ -29,7 +29,7 @@ export function HourlyChart({ data, selectedDate, onClose }: HourlyChartProps) {
             Hourly Breakdown
           </h3>
           <p className="text-sm text-[hsl(var(--muted-foreground))]">
-            {formatDate(selectedDate)} &bull; {formatNumber(totalForDay)} total calls
+              {formatDate(selectedDate)} &bull; {formatNumber(totalForDay)} total credits
           </p>
         </div>
         <button
