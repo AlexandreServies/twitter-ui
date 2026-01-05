@@ -1,17 +1,8 @@
 "use client";
 
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from "recharts";
-import { ChartDataPoint } from "@/lib/types";
-import { formatDate, formatNumber } from "@/lib/utils";
+import {Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis,} from "recharts";
+import {ChartDataPoint} from "@/lib/types";
+import {formatDate, formatNumber} from "@/lib/utils";
 
 interface UsageChartProps {
   data: ChartDataPoint[];
@@ -22,6 +13,7 @@ const COLORS = {
   tweet: "hsl(43, 92%, 55%)",      // Gold
   user: "hsl(168, 76%, 42%)",      // Teal
   community: "hsl(270, 70%, 60%)", // Purple
+    follows: "hsl(340, 82%, 52%)",   // Pink/Red
 };
 
 export function UsageChart({ data, onDateClick }: UsageChartProps) {
@@ -60,6 +52,10 @@ export function UsageChart({ data, onDateClick }: UsageChartProps) {
               <linearGradient id="gradientCommunity" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={COLORS.community} stopOpacity={0.3} />
                 <stop offset="95%" stopColor={COLORS.community} stopOpacity={0} />
+              </linearGradient>
+                <linearGradient id="gradientFollows" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={COLORS.follows} stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor={COLORS.follows} stopOpacity={0}/>
               </linearGradient>
             </defs>
             <CartesianGrid
@@ -132,6 +128,16 @@ export function UsageChart({ data, onDateClick }: UsageChartProps) {
               dot={false}
               activeDot={{ r: 6, stroke: COLORS.community, strokeWidth: 2, fill: "hsl(var(--background))" }}
             />
+              <Area
+                  type="monotone"
+                  dataKey="follows"
+                  name="Follows"
+                  stroke={COLORS.follows}
+                  strokeWidth={2}
+                  fill="url(#gradientFollows)"
+                  dot={false}
+                  activeDot={{r: 6, stroke: COLORS.follows, strokeWidth: 2, fill: "hsl(var(--background))"}}
+              />
           </AreaChart>
         </ResponsiveContainer>
       </div>

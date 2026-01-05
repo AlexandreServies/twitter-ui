@@ -19,6 +19,7 @@ export function transformToChartData(data: UsageResponse, dateRange: DateRange):
             tweet: 0,
             user: 0,
             community: 0,
+            follows: 0,
             total: 0,
         });
     }
@@ -32,11 +33,12 @@ export function transformToChartData(data: UsageResponse, dateRange: DateRange):
           tweet: 0,
           user: 0,
           community: 0,
+            follows: 0,
           total: 0,
         });
       }
       const point = dateMap.get(date)!;
-      const endpointKey = endpoint.replace("/", "") as "tweet" | "user" | "community";
+        const endpointKey = endpoint.replace("/", "") as "tweet" | "user" | "community" | "follows";
       point[endpointKey] = dayData.total;
       point.total += dayData.total;
     }
@@ -57,6 +59,7 @@ export function transformToHourlyData(data: UsageResponse, selectedDate: string)
       tweet: 0,
       user: 0,
       community: 0,
+        follows: 0,
       total: 0,
     });
   }
@@ -68,7 +71,7 @@ export function transformToHourlyData(data: UsageResponse, selectedDate: string)
       for (const [hour, count] of Object.entries(dayData.hours)) {
         const point = hourMap.get(hour);
         if (point) {
-          const endpointKey = endpoint.replace("/", "") as "tweet" | "user" | "community";
+            const endpointKey = endpoint.replace("/", "") as "tweet" | "user" | "community" | "follows";
           point[endpointKey] = count;
           point.total += count;
         }

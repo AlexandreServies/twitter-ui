@@ -1,8 +1,8 @@
 "use client";
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { UsageResponse } from "@/lib/types";
-import { formatNumber } from "@/lib/utils";
+import {Cell, Pie, PieChart, ResponsiveContainer, Tooltip} from "recharts";
+import {UsageResponse} from "@/lib/types";
+import {formatNumber} from "@/lib/utils";
 
 interface EndpointBreakdownProps {
   data: UsageResponse;
@@ -21,6 +21,10 @@ const ENDPOINT_CONFIG: Record<string, { label: string; color: string }> = {
     label: "Community",
     color: "hsl(270, 70%, 60%)",     // Purple
   },
+    "/follows": {
+        label: "Follows",
+        color: "hsl(340, 82%, 52%)",     // Pink/Red
+    },
 };
 
 export function EndpointBreakdown({ data }: EndpointBreakdownProps) {

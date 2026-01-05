@@ -1,18 +1,9 @@
 "use client";
 
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from "recharts";
-import { HourlyDataPoint } from "@/lib/types";
-import { formatDate, formatNumber } from "@/lib/utils";
-import { X } from "lucide-react";
+import {Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis,} from "recharts";
+import {HourlyDataPoint} from "@/lib/types";
+import {formatDate, formatNumber} from "@/lib/utils";
+import {X} from "lucide-react";
 
 interface HourlyChartProps {
   data: HourlyDataPoint[];
@@ -24,6 +15,7 @@ const COLORS = {
   tweet: "hsl(43, 92%, 55%)",      // Gold
   user: "hsl(168, 76%, 42%)",      // Teal
   community: "hsl(270, 70%, 60%)", // Purple
+    follows: "hsl(340, 82%, 52%)",   // Pink/Red
 };
 
 export function HourlyChart({ data, selectedDate, onClose }: HourlyChartProps) {
@@ -113,6 +105,13 @@ export function HourlyChart({ data, selectedDate, onClose }: HourlyChartProps) {
               fill={COLORS.community}
               radius={[4, 4, 0, 0]}
               maxBarSize={20}
+            />
+              <Bar
+                  dataKey="follows"
+                  name="Follows"
+                  fill={COLORS.follows}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={20}
             />
           </BarChart>
         </ResponsiveContainer>

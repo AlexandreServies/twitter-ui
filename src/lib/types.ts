@@ -19,6 +19,7 @@ export interface ChartDataPoint {
   tweet: number;
   user: number;
   community: number;
+    follows: number;
   total: number;
 }
 
@@ -27,6 +28,7 @@ export interface HourlyDataPoint {
   tweet: number;
   user: number;
   community: number;
+    follows: number;
   total: number;
 }
 

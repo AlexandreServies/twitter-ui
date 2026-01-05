@@ -16,7 +16,7 @@ interface StatsCardProps {
   };
 }
 
-export function StatsCard({title, value, icon: Icon, description, medianMs, unit = "calls", trend}: StatsCardProps) {
+export function StatsCard({title, value, icon: Icon, description, medianMs, unit = "credits", trend}: StatsCardProps) {
   return (
     <div className="p-6 rounded-xl bg-[hsl(var(--card))] border border-[hsl(var(--border))] hover:border-[hsl(var(--primary)/0.3)] transition-colors">
         <div className="flex items-center gap-3 mb-4">

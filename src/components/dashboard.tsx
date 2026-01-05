@@ -9,7 +9,18 @@ import {UsageChart} from "./usage-chart";
 import {HourlyChart} from "./hourly-chart";
 import {EndpointBreakdown} from "./endpoint-breakdown";
 import {DateRangePicker} from "./date-range-picker";
-import {Activity, AlertTriangle, BookOpen, Coins, LogOut, MessageSquare, RefreshCw, User, Users} from "lucide-react";
+import {
+    Activity,
+    AlertTriangle,
+    BookOpen,
+    Coins,
+    LogOut,
+    MessageSquare,
+    RefreshCw,
+    User,
+    UserCheck,
+    Users
+} from "lucide-react";
 
 interface DashboardProps {
   data: UsageResponse;
@@ -78,6 +89,7 @@ export function Dashboard({
     const tweetTotal = data.endpoints["/tweet"]?.total || 0;
     const userTotal = data.endpoints["/user"]?.total || 0;
     const communityTotal = data.endpoints["/community"]?.total || 0;
+    const followsTotal = data.endpoints["/follows"]?.total || 0;
 
   return (
     <div className="min-h-screen bg-[hsl(var(--background))]">
@@ -159,7 +171,7 @@ export function Dashboard({
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <StatsCard
               title="All Endpoints"
             value={data.total}
@@ -183,6 +195,12 @@ export function Dashboard({
             icon={Users}
               medianMs={metrics?.["/community/{id}"]?.p50Ms}
           />
+              <StatsCard
+                  title="Follows"
+                  value={followsTotal}
+                  icon={UserCheck}
+                  medianMs={metrics?.["/follows"]?.p50Ms}
+              />
         </div>
 
         {/* Charts */}
