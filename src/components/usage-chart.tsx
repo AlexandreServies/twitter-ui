@@ -1,6 +1,6 @@
 "use client";
 
-import {Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis,} from "recharts";
+import {Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {ChartDataPoint} from "@/lib/types";
 import {formatDate, formatNumber} from "@/lib/utils";
 
@@ -9,11 +9,47 @@ interface UsageChartProps {
   onDateClick?: (date: string) => void;
 }
 
-const COLORS = {
+const COLORS: Record<string, string> = {
   tweet: "hsl(43, 92%, 55%)",      // Gold
   user: "hsl(168, 76%, 42%)",      // Teal
   community: "hsl(270, 70%, 60%)", // Purple
     follows: "hsl(340, 82%, 52%)",   // Pink/Red
+};
+
+const ENDPOINTS = ["tweet", "user", "community", "follows"] as const;
+const ENDPOINT_LABELS: Record<string, string> = {
+    tweet: "Tweet",
+    user: "User",
+    community: "Community",
+    follows: "Follows",
+};
+
+// Custom dot renderer - shows hollow dot on last point to indicate incomplete data
+const CustomDot = (props: {
+    cx?: number;
+    cy?: number;
+    index?: number;
+    dataLength: number;
+    stroke?: string;
+    payload?: ChartDataPoint;
+    dataKey?: string;
+}) => {
+    const {cx, cy, index, dataLength, stroke, payload, dataKey} = props;
+    if (cx === undefined || cy === undefined || index === undefined) return null;
+
+    // Only show dot on last point
+    if (index !== dataLength - 1) return null;
+
+    // Don't show dot if value is 0
+    const value = payload?.[dataKey as keyof ChartDataPoint];
+    if (!value || value === 0) return null;
+
+    return (
+        <g>
+            <circle cx={cx} cy={cy} r={6} fill="hsl(var(--background))" stroke={stroke} strokeWidth={2}/>
+            <circle cx={cx} cy={cy} r={2} fill={stroke}/>
+        </g>
+    );
 };
 
 export function UsageChart({ data, onDateClick }: UsageChartProps) {
@@ -41,22 +77,12 @@ export function UsageChart({ data, onDateClick }: UsageChartProps) {
             }}
           >
             <defs>
-              <linearGradient id="gradientTweet" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={COLORS.tweet} stopOpacity={0.3} />
-                <stop offset="95%" stopColor={COLORS.tweet} stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="gradientUser" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={COLORS.user} stopOpacity={0.3} />
-                <stop offset="95%" stopColor={COLORS.user} stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="gradientCommunity" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={COLORS.community} stopOpacity={0.3} />
-                <stop offset="95%" stopColor={COLORS.community} stopOpacity={0} />
-              </linearGradient>
-                <linearGradient id="gradientFollows" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={COLORS.follows} stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor={COLORS.follows} stopOpacity={0}/>
-              </linearGradient>
+                {ENDPOINTS.map(endpoint => (
+                    <linearGradient key={endpoint} id={`gradient${endpoint}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={COLORS[endpoint]} stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor={COLORS[endpoint]} stopOpacity={0}/>
+                    </linearGradient>
+                ))}
             </defs>
             <CartesianGrid
               strokeDasharray="3 3"
@@ -89,7 +115,7 @@ export function UsageChart({ data, onDateClick }: UsageChartProps) {
               labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
               itemStyle={{ color: "hsl(var(--foreground))" }}
               labelFormatter={(value) => formatDate(value as string)}
-              formatter={(value, name) => [formatNumber(value as number), name]}
+              formatter={(value, name) => [formatNumber(value as number), ENDPOINT_LABELS[name as string] || name]}
               cursor={{ stroke: "hsl(var(--primary))", strokeWidth: 1 }}
             />
             <Legend
@@ -98,54 +124,41 @@ export function UsageChart({ data, onDateClick }: UsageChartProps) {
               iconType="circle"
               wrapperStyle={{ fontSize: "12px" }}
             />
-            <Area
-              type="monotone"
-              dataKey="tweet"
-              name="Tweet"
-              stroke={COLORS.tweet}
-              strokeWidth={2}
-              fill="url(#gradientTweet)"
-              dot={false}
-              activeDot={{ r: 6, stroke: COLORS.tweet, strokeWidth: 2, fill: "hsl(var(--background))" }}
-            />
-            <Area
-              type="monotone"
-              dataKey="user"
-              name="User"
-              stroke={COLORS.user}
-              strokeWidth={2}
-              fill="url(#gradientUser)"
-              dot={false}
-              activeDot={{ r: 6, stroke: COLORS.user, strokeWidth: 2, fill: "hsl(var(--background))" }}
-            />
-            <Area
-              type="monotone"
-              dataKey="community"
-              name="Community"
-              stroke={COLORS.community}
-              strokeWidth={2}
-              fill="url(#gradientCommunity)"
-              dot={false}
-              activeDot={{ r: 6, stroke: COLORS.community, strokeWidth: 2, fill: "hsl(var(--background))" }}
-            />
-              <Area
-                  type="monotone"
-                  dataKey="follows"
-                  name="Follows"
-                  stroke={COLORS.follows}
-                  strokeWidth={2}
-                  fill="url(#gradientFollows)"
-                  dot={false}
-                  activeDot={{r: 6, stroke: COLORS.follows, strokeWidth: 2, fill: "hsl(var(--background))"}}
-              />
+
+              {ENDPOINTS.map(endpoint => (
+                  <Area
+                      key={endpoint}
+                      type="monotone"
+                      dataKey={endpoint}
+                      name={ENDPOINT_LABELS[endpoint]}
+                      stroke={COLORS[endpoint]}
+                      strokeWidth={2}
+                      fill={`url(#gradient${endpoint})`}
+                      dot={(props) => (
+                          <CustomDot
+                              {...props}
+                              dataLength={data.length}
+                              dataKey={endpoint}
+                          />
+                      )}
+                      activeDot={{r: 6, stroke: COLORS[endpoint], strokeWidth: 2, fill: "hsl(var(--background))"}}
+                  />
+              ))}
           </AreaChart>
         </ResponsiveContainer>
       </div>
-      {onDateClick && (
-        <p className="mt-4 text-xs text-center text-[hsl(var(--muted-foreground))]">
-          Click on a date to view hourly breakdown
-        </p>
-      )}
+        <div className="mt-4 flex items-center justify-center gap-2 text-xs text-[hsl(var(--muted-foreground))]">
+        <span className="inline-flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full border-2 border-current"/>
+          Incomplete day
+        </span>
+            {onDateClick && (
+                <>
+                    <span className="mx-2">•</span>
+                    <span>Click on a date to view hourly breakdown</span>
+                </>
+            )}
+        </div>
     </div>
   );
 }
