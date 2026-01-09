@@ -1,4 +1,4 @@
-import {ChartDataPoint, HourlyDataPoint, UsageResponse} from "./types";
+import {AllHoursDataPoint, ChartDataPoint, HourlyDataPoint, UsageResponse} from "./types";
 import {DateRange} from "./api";
 
 export function formatNumber(num: number): string {
@@ -81,6 +81,58 @@ export function transformToHourlyData(data: UsageResponse, selectedDate: string)
   }
 
   return Array.from(hourMap.values());
+}
+
+export function transformToAllHoursData(data: UsageResponse, dateRange: DateRange): AllHoursDataPoint[] {
+    const hourMap = new Map<string, AllHoursDataPoint>();
+
+    // Find the last date with actual data
+    let lastDateWithData = dateRange.from;
+    for (const endpointData of Object.values(data.endpoints)) {
+        for (const date of Object.keys(endpointData.days)) {
+            if (date > lastDateWithData && date <= dateRange.to) {
+                lastDateWithData = date;
+            }
+        }
+    }
+
+    // Initialize all hours from start to last date with data
+    const startDate = new Date(dateRange.from + "T00:00:00");
+    const endDate = new Date(lastDateWithData + "T23:00:00");
+
+    for (let d = new Date(startDate); d <= endDate; d.setHours(d.getHours() + 1)) {
+        const dateStr = d.toISOString().split("T")[0];
+        const hour = d.getHours().toString().padStart(2, "0");
+        const datetime = `${dateStr} ${hour}:00`;
+        hourMap.set(datetime, {
+            datetime,
+            tweet: 0,
+            user: 0,
+            community: 0,
+            follows: 0,
+            total: 0,
+        });
+    }
+
+    // Fill in actual data from endpoints
+    for (const [endpoint, endpointData] of Object.entries(data.endpoints)) {
+        for (const [date, dayData] of Object.entries(endpointData.days)) {
+            if (dayData?.hours) {
+                for (const [hour, count] of Object.entries(dayData.hours)) {
+                    const datetime = `${date} ${hour}:00`;
+                    const point = hourMap.get(datetime);
+                    if (point) {
+                        const endpointKey = endpoint.replace("/", "") as "tweet" | "user" | "community" | "follows";
+                        point[endpointKey] = count;
+                        point.total += count;
+                    }
+                }
+            }
+        }
+    }
+
+    // Sort by datetime ascending
+    return Array.from(hourMap.values()).sort((a, b) => a.datetime.localeCompare(b.datetime));
 }
 
 export function getAvailableDates(data: UsageResponse): string[] {

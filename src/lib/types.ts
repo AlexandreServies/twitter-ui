@@ -27,6 +27,15 @@ export interface HourlyDataPoint {
   hour: string;
   tweet: number;
   user: number;
+    community: number;
+    follows: number;
+    total: number;
+}
+
+export interface AllHoursDataPoint {
+    datetime: string; // "YYYY-MM-DD HH:00"
+    tweet: number;
+    user: number;
   community: number;
     follows: number;
   total: number;

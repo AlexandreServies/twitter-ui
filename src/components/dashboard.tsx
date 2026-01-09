@@ -3,7 +3,7 @@
 import {useMemo, useState} from "react";
 import {MetricsResponse, UsageResponse} from "@/lib/types";
 import {DateRange, sendEmergencyAlert} from "@/lib/api";
-import {getAvailableDates, transformToChartData, transformToHourlyData} from "@/lib/utils";
+import {getAvailableDates, transformToAllHoursData, transformToChartData, transformToHourlyData} from "@/lib/utils";
 import {StatsCard} from "./stats-card";
 import {UsageChart} from "./usage-chart";
 import {HourlyChart} from "./hourly-chart";
@@ -83,6 +83,7 @@ export function Dashboard({
     };
 
     const chartData = useMemo(() => transformToChartData(data, dateRange), [data, dateRange]);
+    const allHoursData = useMemo(() => transformToAllHoursData(data, dateRange), [data, dateRange]);
     const hourlyData = selectedDate ? transformToHourlyData(data, selectedDate) : null;
 
     // Calculate endpoint totals
@@ -214,7 +215,8 @@ export function Dashboard({
               />
             ) : (
               <UsageChart
-                data={chartData}
+                  dailyData={chartData}
+                  hourlyData={allHoursData}
                 onDateClick={(date) => setSelectedDate(date)}
               />
             )}

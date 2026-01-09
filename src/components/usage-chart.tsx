@@ -1,11 +1,13 @@
 "use client";
 
+import {useState} from "react";
 import {Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
-import {ChartDataPoint} from "@/lib/types";
-import {formatDate, formatNumber} from "@/lib/utils";
+import {AllHoursDataPoint, ChartDataPoint} from "@/lib/types";
+import {formatNumber} from "@/lib/utils";
 
 interface UsageChartProps {
-  data: ChartDataPoint[];
+    dailyData: ChartDataPoint[];
+    hourlyData: AllHoursDataPoint[];
   onDateClick?: (date: string) => void;
 }
 
@@ -31,7 +33,7 @@ const CustomDot = (props: {
     index?: number;
     dataLength: number;
     stroke?: string;
-    payload?: ChartDataPoint;
+    payload?: ChartDataPoint | AllHoursDataPoint;
     dataKey?: string;
 }) => {
     const {cx, cy, index, dataLength, stroke, payload, dataKey} = props;
@@ -41,7 +43,7 @@ const CustomDot = (props: {
     if (index !== dataLength - 1) return null;
 
     // Don't show dot if value is 0
-    const value = payload?.[dataKey as keyof ChartDataPoint];
+    const value = payload?.[dataKey as keyof (ChartDataPoint | AllHoursDataPoint)];
     if (!value || value === 0) return null;
 
     return (
@@ -52,16 +54,64 @@ const CustomDot = (props: {
     );
 };
 
-export function UsageChart({ data, onDateClick }: UsageChartProps) {
+function formatDateLabel(dateStr: string): string {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+    });
+}
+
+function formatHourLabel(datetime: string): string {
+    // datetime is "YYYY-MM-DD HH:00"
+    const [date, time] = datetime.split(" ");
+    const d = new Date(date);
+    const hour = parseInt(time.split(":")[0]);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const hour12 = hour % 12 || 12;
+    return `${d.toLocaleDateString("en-US", {month: "short", day: "numeric"})} ${hour12}${ampm}`;
+}
+
+export function UsageChart({dailyData, hourlyData, onDateClick}: UsageChartProps) {
+    const [viewMode, setViewMode] = useState<"daily" | "hourly">("daily");
+
+    const data = viewMode === "daily" ? dailyData : hourlyData;
+    const dataKey = viewMode === "daily" ? "date" : "datetime";
+    const formatLabel = viewMode === "daily" ? formatDateLabel : formatHourLabel;
+
   return (
     <div className="p-6 rounded-xl bg-[hsl(var(--card))] border border-[hsl(var(--border))]">
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-[hsl(var(--foreground))]">
-          Daily Usage
-        </h3>
-        <p className="text-sm text-[hsl(var(--muted-foreground))]">
-            API credits per day by endpoint
-        </p>
+        <div className="mb-6 flex items-center justify-between">
+            <div>
+                <h3 className="text-lg font-semibold text-[hsl(var(--foreground))]">
+                    {viewMode === "daily" ? "Daily" : "Hourly"} Usage
+                </h3>
+                <p className="text-sm text-[hsl(var(--muted-foreground))]">
+                    API credits per {viewMode === "daily" ? "day" : "hour"} by endpoint
+                </p>
+            </div>
+            <div className="flex items-center gap-1 p-1 rounded-lg bg-[hsl(var(--muted))]">
+                <button
+                    onClick={() => setViewMode("daily")}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                        viewMode === "daily"
+                            ? "bg-[hsl(var(--background))] text-[hsl(var(--foreground))] shadow-sm"
+                            : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+                    }`}
+                >
+                    Daily
+                </button>
+                <button
+                    onClick={() => setViewMode("hourly")}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                        viewMode === "hourly"
+                            ? "bg-[hsl(var(--background))] text-[hsl(var(--foreground))] shadow-sm"
+                            : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+                    }`}
+                >
+                    Hourly
+                </button>
+            </div>
       </div>
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
@@ -69,6 +119,7 @@ export function UsageChart({ data, onDateClick }: UsageChartProps) {
             data={data}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
             onClick={(e) => {
+                if (viewMode !== "daily") return;
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const payload = (e as any)?.activePayload?.[0]?.payload;
               if (payload?.date && onDateClick) {
@@ -90,12 +141,13 @@ export function UsageChart({ data, onDateClick }: UsageChartProps) {
               vertical={false}
             />
             <XAxis
-              dataKey="date"
-              tickFormatter={(value) => formatDate(value)}
+                dataKey={dataKey}
+                tickFormatter={formatLabel}
               stroke="hsl(var(--muted-foreground))"
               fontSize={12}
               tickLine={false}
               axisLine={false}
+                interval={viewMode === "hourly" ? Math.floor(data.length / 8) : undefined}
             />
             <YAxis
               tickFormatter={(value) => formatNumber(value)}
@@ -114,7 +166,7 @@ export function UsageChart({ data, onDateClick }: UsageChartProps) {
               }}
               labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
               itemStyle={{ color: "hsl(var(--foreground))" }}
-              labelFormatter={(value) => formatDate(value as string)}
+              labelFormatter={(value) => formatLabel(value as string)}
               formatter={(value, name) => [formatNumber(value as number), ENDPOINT_LABELS[name as string] || name]}
               cursor={{ stroke: "hsl(var(--primary))", strokeWidth: 1 }}
             />
@@ -150,9 +202,9 @@ export function UsageChart({ data, onDateClick }: UsageChartProps) {
         <div className="mt-4 flex items-center justify-center gap-2 text-xs text-[hsl(var(--muted-foreground))]">
         <span className="inline-flex items-center gap-1">
           <span className="w-2 h-2 rounded-full border-2 border-current"/>
-          Incomplete day
+          Incomplete {viewMode === "daily" ? "day" : "hour"}
         </span>
-            {onDateClick && (
+            {viewMode === "daily" && onDateClick && (
                 <>
                     <span className="mx-2">•</span>
                     <span>Click on a date to view hourly breakdown</span>
