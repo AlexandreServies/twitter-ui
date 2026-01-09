@@ -18,15 +18,15 @@ const ENDPOINT_CONFIG: Record<string, { label: string; color: string }> = {
     color: "hsl(168, 76%, 42%)",     // Teal
   },
   "/community": {
-    label: "Community",
+      label: "Community (single)",
     color: "hsl(270, 70%, 60%)",     // Purple
   },
     "/follows": {
-        label: "Follows",
+        label: "Follows (batch)",
         color: "hsl(340, 82%, 52%)",     // Pink/Red
     },
     "/communities": {
-        label: "Communities",
+        label: "Communities (batch)",
         color: "hsl(190, 95%, 45%)",     // Cyan
     },
 };
