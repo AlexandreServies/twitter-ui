@@ -16,14 +16,16 @@ const COLORS: Record<string, string> = {
   user: "hsl(168, 76%, 42%)",      // Teal
   community: "hsl(270, 70%, 60%)", // Purple
     follows: "hsl(340, 82%, 52%)",   // Pink/Red
+    communities: "hsl(190, 95%, 45%)", // Cyan
 };
 
-const ENDPOINTS = ["tweet", "user", "community", "follows"] as const;
+const ENDPOINTS = ["tweet", "user", "community", "follows", "communities"] as const;
 const ENDPOINT_LABELS: Record<string, string> = {
     tweet: "Tweet",
     user: "User",
     community: "Community",
     follows: "Follows",
+    communities: "Communities",
 };
 
 // Custom dot renderer - shows hollow dot on last point to indicate incomplete data

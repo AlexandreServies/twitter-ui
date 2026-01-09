@@ -16,6 +16,7 @@ const COLORS = {
   user: "hsl(168, 76%, 42%)",      // Teal
   community: "hsl(270, 70%, 60%)", // Purple
     follows: "hsl(340, 82%, 52%)",   // Pink/Red
+    communities: "hsl(190, 95%, 45%)", // Cyan
 };
 
 export function HourlyChart({ data, selectedDate, onClose }: HourlyChartProps) {
@@ -110,6 +111,13 @@ export function HourlyChart({ data, selectedDate, onClose }: HourlyChartProps) {
                   dataKey="follows"
                   name="Follows"
                   fill={COLORS.follows}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={20}
+              />
+              <Bar
+                  dataKey="communities"
+                  name="Communities"
+                  fill={COLORS.communities}
                   radius={[4, 4, 0, 0]}
                   maxBarSize={20}
             />

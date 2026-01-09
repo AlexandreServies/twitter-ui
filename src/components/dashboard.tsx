@@ -19,7 +19,8 @@ import {
     RefreshCw,
     User,
     UserCheck,
-    Users
+    Users,
+    UsersRound
 } from "lucide-react";
 
 interface DashboardProps {
@@ -91,6 +92,7 @@ export function Dashboard({
     const userTotal = data.endpoints["/user"]?.total || 0;
     const communityTotal = data.endpoints["/community"]?.total || 0;
     const followsTotal = data.endpoints["/follows"]?.total || 0;
+    const communitiesTotal = data.endpoints["/communities"]?.total || 0;
 
   return (
     <div className="min-h-screen bg-[hsl(var(--background))]">
@@ -172,7 +174,7 @@ export function Dashboard({
         </div>
 
         {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+          <div className="grid grid-cols-2 gap-4 mb-8">
           <StatsCard
               title="All Endpoints"
             value={data.total}
@@ -191,7 +193,7 @@ export function Dashboard({
               medianMs={metrics?.["/user/{idOrHandle}"]?.p50Ms}
           />
           <StatsCard
-              title="Communities"
+              title="Community"
             value={communityTotal}
             icon={Users}
               medianMs={metrics?.["/community/{id}"]?.p50Ms}
@@ -201,6 +203,12 @@ export function Dashboard({
                   value={followsTotal}
                   icon={UserCheck}
                   medianMs={metrics?.["/follows"]?.p50Ms}
+              />
+              <StatsCard
+                  title="Communities"
+                  value={communitiesTotal}
+                  icon={UsersRound}
+                  medianMs={metrics?.["/communities"]?.p50Ms}
               />
         </div>
 

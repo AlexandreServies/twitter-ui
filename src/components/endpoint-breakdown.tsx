@@ -25,6 +25,10 @@ const ENDPOINT_CONFIG: Record<string, { label: string; color: string }> = {
         label: "Follows",
         color: "hsl(340, 82%, 52%)",     // Pink/Red
     },
+    "/communities": {
+        label: "Communities",
+        color: "hsl(190, 95%, 45%)",     // Cyan
+    },
 };
 
 export function EndpointBreakdown({ data }: EndpointBreakdownProps) {
