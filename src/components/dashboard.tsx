@@ -193,19 +193,19 @@ export function Dashboard({
               medianMs={metrics?.["/user/{idOrHandle}"]?.p50Ms}
           />
           <StatsCard
-              title="Community"
+              title="Community (single)"
             value={communityTotal}
             icon={Users}
               medianMs={metrics?.["/community/{id}"]?.p50Ms}
           />
               <StatsCard
-                  title="Follows"
+                  title="Follows (batch)"
                   value={followsTotal}
                   icon={UserCheck}
                   medianMs={metrics?.["/follows"]?.p50Ms}
               />
               <StatsCard
-                  title="Communities"
+                  title="Communities (batch)"
                   value={communitiesTotal}
                   icon={UsersRound}
                   medianMs={metrics?.["/communities"]?.p50Ms}
