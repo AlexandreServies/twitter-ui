@@ -174,7 +174,7 @@ export function Dashboard({
         </div>
 
         {/* Stats Cards */}
-          <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-3 gap-4 mb-8">
           <StatsCard
               title="All Endpoints"
             value={data.total}
