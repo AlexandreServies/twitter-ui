@@ -56,3 +56,16 @@ export interface EndpointMetrics {
 export interface MetricsResponse {
     [endpoint: string]: EndpointMetrics;
 }
+
+export interface ApiKeyEntry {
+    id: string;
+    key: string;
+    label?: string;
+}
+
+export interface TabData {
+    data: UsageResponse | null;
+    metrics: MetricsResponse | null;
+    isLoading: boolean;
+    error: string | null;
+}
