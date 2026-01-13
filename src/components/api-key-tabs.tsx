@@ -1,7 +1,7 @@
 "use client";
 
 import {useEffect, useRef, useState} from "react";
-import {Check, Eye, EyeOff, Plus, X} from "lucide-react";
+import {Check, Eye, EyeOff, Pencil, Plus, X} from "lucide-react";
 import {ApiKeyEntry} from "@/lib/types";
 import {formatKeyLabel} from "@/lib/storage";
 
@@ -31,7 +31,6 @@ export function ApiKeyTabs({
     const [showNewKey, setShowNewKey] = useState(false);
     const [editingTabId, setEditingTabId] = useState<string | null>(null);
     const [editingLabel, setEditingLabel] = useState("");
-    const [contextMenu, setContextMenu] = useState<{ id: string; x: number; y: number } | null>(null);
 
     const inputRef = useRef<HTMLInputElement>(null);
     const editInputRef = useRef<HTMLInputElement>(null);
@@ -50,15 +49,6 @@ export function ApiKeyTabs({
             editInputRef.current.select();
         }
     }, [editingTabId]);
-
-    // Close context menu on click outside
-    useEffect(() => {
-        const handleClick = () => setContextMenu(null);
-        if (contextMenu) {
-            document.addEventListener("click", handleClick);
-            return () => document.removeEventListener("click", handleClick);
-        }
-    }, [contextMenu]);
 
     // Track if we were previously adding (to detect successful add completion)
     const wasAddingKey = useRef(false);
@@ -96,7 +86,7 @@ export function ApiKeyTabs({
         }
     };
 
-    const handleTabDoubleClick = (entry: ApiKeyEntry) => {
+    const startEditing = (entry: ApiKeyEntry) => {
         setEditingTabId(entry.id);
         setEditingLabel(entry.label || formatKeyLabel(entry.key));
     };
@@ -119,24 +109,17 @@ export function ApiKeyTabs({
         }
     };
 
-    const handleContextMenu = (e: React.MouseEvent, id: string) => {
-        e.preventDefault();
-        setContextMenu({id, x: e.clientX, y: e.clientY});
-    };
-
     return (
         <div className="relative">
             <div className="flex items-end gap-1 px-4 sm:px-6 lg:px-8">
                 {apiKeys.map((entry) => (
                     <div
                         key={entry.id}
-                        className="relative"
+                        className="relative group"
                     >
                         <button
                             onClick={() => onSelectTab(entry.id)}
-                            onDoubleClick={() => handleTabDoubleClick(entry)}
-                            onContextMenu={(e) => handleContextMenu(e, entry.id)}
-                            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                            className={`flex items-center gap-1.5 pl-3 pr-2 py-2 text-sm font-medium rounded-t-lg transition-colors ${
                                 activeTabId === entry.id
                                     ? "bg-[hsl(var(--card))] text-[hsl(var(--foreground))]"
                                     : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]"
@@ -150,11 +133,39 @@ export function ApiKeyTabs({
                                     onChange={(e) => setEditingLabel(e.target.value)}
                                     onBlur={handleEditSubmit}
                                     onKeyDown={handleEditKeyDown}
-                                    className="w-24 bg-transparent border-b border-[hsl(var(--primary))] outline-none text-center"
+                                    className="w-24 bg-transparent border-b border-[hsl(var(--primary))] outline-none"
                                     onClick={(e) => e.stopPropagation()}
                                 />
                             ) : (
-                                formatKeyLabel(entry.key, entry.label)
+                                <>
+                                    <span>{formatKeyLabel(entry.key, entry.label)}</span>
+                                    {/* Hover actions */}
+                                    <span
+                                        className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <span
+                                            role="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                startEditing(entry);
+                                            }}
+                                            className="p-0.5 rounded hover:bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+                                            title="Rename"
+                                        >
+                                            <Pencil className="w-3 h-3"/>
+                                        </span>
+                                        <span
+                                            role="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onRemoveKey(entry.id);
+                                            }}
+                                            className="p-0.5 rounded hover:bg-[hsl(var(--destructive)/0.1)] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--destructive))]"
+                                            title="Remove"
+                                        >
+                                            <X className="w-3 h-3"/>
+                                        </span>
+                                    </span>
+                                </>
                             )}
                         </button>
                         {/* Active indicator */}
@@ -226,36 +237,6 @@ export function ApiKeyTabs({
                 <div
                     className="mx-4 sm:mx-6 lg:mx-8 mt-2 px-3 py-2 rounded-lg bg-[hsl(var(--destructive)/0.1)] border border-[hsl(var(--destructive)/0.3)] text-[hsl(var(--destructive))] text-sm">
                     {addKeyError}
-                </div>
-            )}
-
-            {/* Context menu */}
-            {contextMenu && (
-                <div
-                    className="fixed z-50 py-1 min-w-[120px] rounded-lg bg-[hsl(var(--popover))] border border-[hsl(var(--border))] shadow-lg"
-                    style={{left: contextMenu.x, top: contextMenu.y}}
-                >
-                    <button
-                        onClick={() => {
-                            const entry = apiKeys.find((k) => k.id === contextMenu.id);
-                            if (entry) handleTabDoubleClick(entry);
-                            setContextMenu(null);
-                        }}
-                        className="w-full px-3 py-1.5 text-sm text-left text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))] transition-colors"
-                    >
-                        Rename
-                    </button>
-                    <button
-                        onClick={() => {
-                            if (confirm("Remove this API key? You can re-add it anytime.")) {
-                                onRemoveKey(contextMenu.id);
-                            }
-                            setContextMenu(null);
-                        }}
-                        className="w-full px-3 py-1.5 text-sm text-left text-[hsl(var(--destructive))] hover:bg-[hsl(var(--muted))] transition-colors"
-                    >
-                        Remove
-                    </button>
                 </div>
             )}
         </div>
