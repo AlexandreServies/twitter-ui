@@ -2,36 +2,20 @@
 
 import {useMemo, useState} from "react";
 import {MetricsResponse, UsageResponse} from "@/lib/types";
-import {sendEmergencyAlert} from "@/lib/api";
 import {transformToAllHoursData, transformToChartData, transformToHourlyData} from "@/lib/utils";
 import {StatsCard} from "./stats-card";
 import {UsageChart} from "./usage-chart";
 import {HourlyChart} from "./hourly-chart";
 import {EndpointBreakdown} from "./endpoint-breakdown";
-import {Activity, AlertTriangle, Coins, MessageSquare, User, UserCheck, Users, UsersRound,} from "lucide-react";
+import {Activity, Coins, MessageSquare, User, UserCheck, Users, UsersRound,} from "lucide-react";
 
 interface DashboardProps {
     data: UsageResponse;
     metrics: MetricsResponse | null;
-    apiKey: string;
 }
 
-export function Dashboard({data, metrics, apiKey}: DashboardProps) {
+export function Dashboard({data, metrics}: DashboardProps) {
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
-    const [showEmergencyConfirm, setShowEmergencyConfirm] = useState(false);
-    const [emergencySending, setEmergencySending] = useState(false);
-
-    const handleEmergencyAlert = async () => {
-        setEmergencySending(true);
-        try {
-            await sendEmergencyAlert(apiKey);
-            setShowEmergencyConfirm(false);
-        } catch (error) {
-            console.error("Failed to send emergency alert:", error);
-        } finally {
-            setEmergencySending(false);
-        }
-    };
 
     // Use full date range from data
     const dateRange = useMemo(() => {
@@ -67,24 +51,14 @@ export function Dashboard({data, metrics, apiKey}: DashboardProps) {
         <div className="bg-[hsl(var(--background))]">
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Top row: Credits + Emergency */}
-                <div className="flex items-start justify-between gap-4 mb-6">
-                    <div className="flex-1">
-                        <StatsCard
-                            title="Credits Remaining"
-                            value={data.creditsRemaining}
-                            icon={Coins}
-                            unit="credits"
-                        />
-                    </div>
-                    <button
-                        onClick={() => setShowEmergencyConfirm(true)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 transition-colors"
-                        title="Emergency Alert"
-                    >
-                        <AlertTriangle className="w-4 h-4 text-white"/>
-                        <span className="text-sm font-medium text-white">Emergency</span>
-                    </button>
+                {/* Credits Card */}
+                <div className="mb-6">
+                    <StatsCard
+                        title="Credits Remaining"
+                        value={data.creditsRemaining}
+                        icon={Coins}
+                        unit="credits"
+                    />
                 </div>
 
                 {/* Stats Cards */}
@@ -148,44 +122,6 @@ export function Dashboard({data, metrics, apiKey}: DashboardProps) {
                     </div>
                 </div>
             </main>
-
-            {/* Emergency Confirmation Modal */}
-            {showEmergencyConfirm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div
-                        className="bg-[hsl(var(--background))] border border-[hsl(var(--border))] rounded-lg p-6 max-w-md mx-4 shadow-xl">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 rounded-full bg-red-100">
-                                <AlertTriangle className="w-6 h-6 text-red-600"/>
-                            </div>
-                            <h3 className="text-lg font-semibold text-[hsl(var(--foreground))]">
-                                Emergency Alert
-                            </h3>
-                        </div>
-                        <p className="text-[hsl(var(--muted-foreground))] mb-6">
-                            Are you sure you want to send an emergency alert? This will send a high-priority
-                            notification
-                            immediately.
-                        </p>
-                        <div className="flex gap-3 justify-end">
-                            <button
-                                onClick={() => setShowEmergencyConfirm(false)}
-                                disabled={emergencySending}
-                                className="px-4 py-2 rounded-lg border border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))] transition-colors disabled:opacity-50"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleEmergencyAlert}
-                                disabled={emergencySending}
-                                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-colors disabled:opacity-50"
-                            >
-                                {emergencySending ? "Sending..." : "Send Alert"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

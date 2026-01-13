@@ -1,9 +1,9 @@
 "use client";
 
 import {useCallback, useEffect, useState} from "react";
-import {Activity, BookOpen, RefreshCw} from "lucide-react";
+import {Activity, AlertTriangle, BookOpen, RefreshCw} from "lucide-react";
 import {ApiKeyEntry, TabData} from "@/lib/types";
-import {DateRange, fetchMetrics, fetchUsage, getDefaultDateRange} from "@/lib/api";
+import {DateRange, fetchMetrics, fetchUsage, getDefaultDateRange, sendEmergencyAlert} from "@/lib/api";
 import {generateId, getStoredApiKeys, saveApiKeys} from "@/lib/storage";
 import {EmptyState} from "@/components/empty-state";
 import {ApiKeyTabs} from "@/components/api-key-tabs";
@@ -21,6 +21,23 @@ export default function Home() {
     // For tracking add key state
     const [isAddingKey, setIsAddingKey] = useState(false);
     const [addKeyError, setAddKeyError] = useState<string | null>(null);
+
+    // Emergency alert state
+    const [showEmergencyConfirm, setShowEmergencyConfirm] = useState(false);
+    const [emergencySending, setEmergencySending] = useState(false);
+
+    const handleEmergencyAlert = async () => {
+        if (!activeEntry) return;
+        setEmergencySending(true);
+        try {
+            await sendEmergencyAlert(activeEntry.key);
+            setShowEmergencyConfirm(false);
+        } catch (error) {
+            console.error("Failed to send emergency alert:", error);
+        } finally {
+            setEmergencySending(false);
+        }
+    };
 
     // Fetch data for a single API key
     const fetchDataForKey = useCallback(async (entry: ApiKeyEntry, range: DateRange) => {
@@ -247,6 +264,14 @@ export default function Home() {
                                         <RefreshCw
                                             className={`w-5 h-5 text-[hsl(var(--muted-foreground))] ${activeTabData?.isLoading ? "animate-spin" : ""}`}/>
                                     </button>
+                                    <button
+                                        onClick={() => setShowEmergencyConfirm(true)}
+                                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 transition-colors"
+                                        title="Emergency Alert"
+                                    >
+                                        <AlertTriangle className="w-4 h-4 text-white"/>
+                                        <span className="text-sm font-medium text-white">Emergency</span>
+                                    </button>
                                 </>
                             )}
                             <a
@@ -309,7 +334,6 @@ export default function Home() {
                             <Dashboard
                                 data={activeTabData.data}
                                 metrics={activeTabData.metrics}
-                                apiKey={activeEntry.key}
                             />
                         ) : null}
                     </div>
@@ -332,6 +356,43 @@ export default function Home() {
                     </p>
                 </div>
             </footer>
+
+            {/* Emergency Confirmation Modal */}
+            {showEmergencyConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div
+                        className="bg-[hsl(var(--background))] border border-[hsl(var(--border))] rounded-lg p-6 max-w-md mx-4 shadow-xl">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 rounded-full bg-red-100">
+                                <AlertTriangle className="w-6 h-6 text-red-600"/>
+                            </div>
+                            <h3 className="text-lg font-semibold text-[hsl(var(--foreground))]">
+                                Emergency Alert
+                            </h3>
+                        </div>
+                        <p className="text-[hsl(var(--muted-foreground))] mb-6">
+                            Are you sure you want to send an emergency alert? This will send a high-priority
+                            notification immediately.
+                        </p>
+                        <div className="flex gap-3 justify-end">
+                            <button
+                                onClick={() => setShowEmergencyConfirm(false)}
+                                disabled={emergencySending}
+                                className="px-4 py-2 rounded-lg border border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))] transition-colors disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleEmergencyAlert}
+                                disabled={emergencySending}
+                                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-colors disabled:opacity-50"
+                            >
+                                {emergencySending ? "Sending..." : "Send Alert"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
