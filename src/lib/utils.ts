@@ -31,6 +31,7 @@ export function transformToChartData(data: UsageResponse, dateRange: DateRange):
             community: 0,
             follows: 0,
             communities: 0,
+            timeline: 0,
             total: 0,
         });
     }
@@ -40,7 +41,7 @@ export function transformToChartData(data: UsageResponse, dateRange: DateRange):
     for (const [date, dayData] of Object.entries(endpointData.days)) {
         if (!dateMap.has(date)) continue;
       const point = dateMap.get(date)!;
-        const endpointKey = endpoint.replace("/", "") as "tweet" | "user" | "community" | "follows" | "communities";
+        const endpointKey = endpoint.replace("/", "") as "tweet" | "user" | "community" | "follows" | "communities" | "timeline";
       point[endpointKey] = dayData.total;
       point.total += dayData.total;
     }
@@ -63,6 +64,7 @@ export function transformToHourlyData(data: UsageResponse, selectedDate: string)
       community: 0,
         follows: 0,
         communities: 0,
+        timeline: 0,
       total: 0,
     });
   }
@@ -74,7 +76,7 @@ export function transformToHourlyData(data: UsageResponse, selectedDate: string)
       for (const [hour, count] of Object.entries(dayData.hours)) {
         const point = hourMap.get(hour);
         if (point) {
-            const endpointKey = endpoint.replace("/", "") as "tweet" | "user" | "community" | "follows" | "communities";
+            const endpointKey = endpoint.replace("/", "") as "tweet" | "user" | "community" | "follows" | "communities" | "timeline";
           point[endpointKey] = count;
           point.total += count;
         }
@@ -113,6 +115,7 @@ export function transformToAllHoursData(data: UsageResponse, dateRange: DateRang
             community: 0,
             follows: 0,
             communities: 0,
+            timeline: 0,
             total: 0,
         });
     }
@@ -125,7 +128,7 @@ export function transformToAllHoursData(data: UsageResponse, dateRange: DateRang
                     const datetime = `${date} ${hour}:00`;
                     const point = hourMap.get(datetime);
                     if (point) {
-                        const endpointKey = endpoint.replace("/", "") as "tweet" | "user" | "community" | "follows" | "communities";
+                        const endpointKey = endpoint.replace("/", "") as "tweet" | "user" | "community" | "follows" | "communities" | "timeline";
                         point[endpointKey] = count;
                         point.total += count;
                     }

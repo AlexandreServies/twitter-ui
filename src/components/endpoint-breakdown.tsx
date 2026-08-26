@@ -29,6 +29,10 @@ const ENDPOINT_CONFIG: Record<string, { label: string; color: string }> = {
         label: "Communities (batch)",
         color: "hsl(190, 95%, 45%)",     // Cyan
     },
+    "/timeline": {
+        label: "Timeline",
+        color: "hsl(25, 95%, 55%)",      // Orange
+    },
 };
 
 export function EndpointBreakdown({ data }: EndpointBreakdownProps) {

@@ -17,6 +17,7 @@ const COLORS = {
   community: "hsl(270, 70%, 60%)", // Purple
     follows: "hsl(340, 82%, 52%)",   // Pink/Red
     communities: "hsl(190, 95%, 45%)", // Cyan
+    timeline: "hsl(25, 95%, 55%)",   // Orange
 };
 
 export function HourlyChart({ data, selectedDate, onClose }: HourlyChartProps) {
@@ -121,6 +122,13 @@ export function HourlyChart({ data, selectedDate, onClose }: HourlyChartProps) {
                   radius={[4, 4, 0, 0]}
                   maxBarSize={20}
             />
+              <Bar
+                  dataKey="timeline"
+                  name="Timeline"
+                  fill={COLORS.timeline}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={20}
+              />
           </BarChart>
         </ResponsiveContainer>
       </div>

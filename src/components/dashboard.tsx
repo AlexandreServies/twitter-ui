@@ -7,7 +7,7 @@ import {StatsCard} from "./stats-card";
 import {UsageChart} from "./usage-chart";
 import {HourlyChart} from "./hourly-chart";
 import {EndpointBreakdown} from "./endpoint-breakdown";
-import {Activity, Coins, MessageSquare, User, UserCheck, Users, UsersRound,} from "lucide-react";
+import {Activity, Coins, History, MessageSquare, User, UserCheck, Users, UsersRound,} from "lucide-react";
 
 interface DashboardProps {
     data: UsageResponse;
@@ -46,6 +46,7 @@ export function Dashboard({data, metrics}: DashboardProps) {
     const communityTotal = data.endpoints["/community"]?.total || 0;
     const followsTotal = data.endpoints["/follows"]?.total || 0;
     const communitiesTotal = data.endpoints["/communities"]?.total || 0;
+    const timelineTotal = data.endpoints["/timeline"]?.total || 0;
 
     return (
         <div className="bg-[hsl(var(--background))]">
@@ -97,6 +98,12 @@ export function Dashboard({data, metrics}: DashboardProps) {
                         value={communitiesTotal}
                         icon={UsersRound}
                         medianMs={metrics?.["/communities"]?.p50Ms}
+                    />
+                    <StatsCard
+                        title="Timeline"
+                        value={timelineTotal}
+                        icon={History}
+                        medianMs={metrics?.["/user/{idOrHandle}/timeline"]?.p50Ms}
                     />
                 </div>
 
