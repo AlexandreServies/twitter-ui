@@ -21,6 +21,7 @@ export interface ChartDataPoint {
   community: number;
     follows: number;
     communities: number;
+    timeline: number;
   total: number;
 }
 
@@ -31,6 +32,7 @@ export interface HourlyDataPoint {
     community: number;
     follows: number;
     communities: number;
+    timeline: number;
     total: number;
 }
 
@@ -41,6 +43,7 @@ export interface AllHoursDataPoint {
   community: number;
     follows: number;
     communities: number;
+    timeline: number;
   total: number;
 }
 
